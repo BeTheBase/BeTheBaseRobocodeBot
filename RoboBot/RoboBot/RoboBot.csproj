@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>BCDK</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AntiGravBot.cs" />
+    <Compile Remove="BeTheBaseClone.cs" />
+    <Compile Remove="DodgeBot.cs" />
+    <Compile Remove="LittleBase.cs" />
+    <Compile Remove="LittleJoe.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="robocode">
+      <HintPath>..\..\..\..\..\RoboCode\libs\robocode.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
