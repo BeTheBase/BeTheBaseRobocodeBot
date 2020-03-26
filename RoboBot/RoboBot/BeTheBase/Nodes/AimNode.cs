@@ -61,12 +61,11 @@ namespace BCDK
         }
 
         /**This function predicts the time of the intersection between the 
-bullet and the target based on a simple iteration.  It then moves 
-the gun to the correct angle to fire on the target.**/
+            bullet and the target based on a simple iteration.  It then moves 
+            the gun to the correct angle to fire on the target.**/
         public void AimGun()
         {
             EnemyData target = this.bb.CurrentEnemy;
-            //target.update(this.bb.ScannendEvent, this.bb.Robot);
             AdvancedRobot r = this.bb.Robot;
             long time;
             long nextTime;
@@ -74,17 +73,17 @@ the gun to the correct angle to fire on the target.**/
             p = new Point((int)target.x, (int)target.y);
             for (int i = 0; i < 10; i++)
             {
-                nextTime = (long)Math.Round((getRange(r.X, r.Y, p.X, p.Y) / (20 - (3 * Rules.MAX_BULLET_POWER))));
+                nextTime = (long)Math.Round((GetRange(r.X, r.Y, p.X, p.Y) / (20 - (3 * Rules.MAX_BULLET_POWER))));
                 time = r.Time + nextTime;
                 p = target.guessPosition(time);
             }
             /**Turn the gun to the correct angle**/
             double gunOffset = r.GunHeadingRadians -
                           (Math.PI / 2 - Math.Atan2(p.Y - r.Y, p.X - r.X));
-            r.SetTurnGunLeftRadians(normaliseBearing(gunOffset));
+            r.SetTurnGunLeftRadians(NormaliseBearing(gunOffset));
         }
 
-        double normaliseBearing(double ang)
+        private double NormaliseBearing(double ang)
         {
             if (ang > Math.PI)
                 ang -= 2 * Math.PI;
@@ -93,7 +92,7 @@ the gun to the correct angle to fire on the target.**/
             return ang;
         }
 
-        public double getRange(double x1, double y1, double x2, double y2)
+        private double GetRange(double x1, double y1, double x2, double y2)
         {
             double x = x2 - x1;
             double y = y2 - y1;

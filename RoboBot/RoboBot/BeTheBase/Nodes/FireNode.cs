@@ -47,18 +47,18 @@ namespace BCDK
             */
             //double absoluteBearing = this.bb.Robot.Heading + this.bb.ScannendEvent.Bearing;
             //this.bb.Robot.TurnGunRight(Utils.ToDegrees(Utils.NormalRelativeAngle(Utils.ToRadians(absoluteBearing - this.bb.Robot.GunHeading))));
-            this.power = (400 / this.bb.ScannendEvent.Distance);
+            this.power = (400 / this.bb.CurrentEnemy.E.Distance);
             // selects a bullet power based on our distance away from the target
 
             double bulletSpeed = 20 - power * 3;
             // distance = rate * time, solved for time
-            long time = (long)Math.Ceiling(this.bb.ScannendEvent.Distance / Robocode.Rules.GetBulletSpeed(power));
+            long time = (long)Math.Ceiling(this.bb.CurrentEnemy.E.Distance / Robocode.Rules.GetBulletSpeed(power));
             //long time = (long)(this.bb.currentEnemy.GetDistance() / bulletSpeed);
             // calculate gun turn to predicted x,y location
             if (this.bb.PredictedEnemyDataStart == null)
                 this.bb.PredictedEnemyDataStart = this.bb.CurrentEnemy;
-            double futureX = this.bb.CurrentEnemy.getFutureX((long)time,this.bb.CurrentEnemy.EnemyHeading, this.bb.CurrentEnemy.EnemyVelocity);
-            double futureY = this.bb.CurrentEnemy.getFutureY((long)time, this.bb.CurrentEnemy.EnemyHeading, this.bb.CurrentEnemy.EnemyVelocity);
+            double futureX = this.bb.CurrentEnemy.GetFutureX((long)time,this.bb.CurrentEnemy.EnemyHeading, this.bb.CurrentEnemy.EnemyVelocity);
+            double futureY = this.bb.CurrentEnemy.GetFutureY((long)time, this.bb.CurrentEnemy.EnemyHeading, this.bb.CurrentEnemy.EnemyVelocity);
             double absDeg = AbsoluteBearing(this.bb.Robot.X, this.bb.Robot.Y, futureX, futureY);
             // turn the gun to the predicted x,y location
             this.bb.Robot.TurnGunRight(normalizeBearing(absDeg - this.bb.Robot.GunHeading));
@@ -71,7 +71,7 @@ namespace BCDK
 
         private void SetFirePower()
         {          
-            this.power = (400 / this.bb.ScannendEvent.Distance);
+            this.power = (400 / this.bb.CurrentEnemy.E.Distance);
             // selects a bullet power based on our distance away from the target
             if ((this.power > 3))
             {

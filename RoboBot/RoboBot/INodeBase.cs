@@ -4,12 +4,6 @@ using System.Text;
 
 namespace BCDK
 {
-    public enum BehaviourTreeStatus
-    {
-        Success,
-        Failure,
-        Running
-    }
 
     public interface INodeBase
     {
@@ -17,9 +11,4 @@ namespace BCDK
         BehaviourTreeStatus Tick(TimeData timeData);
     }
 
-    public abstract class BaseNode
-    {
-        protected BlackBoard bb;
-        public abstract BehaviourTreeStatus Tick();
-    }
 }

@@ -19,7 +19,7 @@ namespace BCDK
         public override BehaviourTreeStatus Tick()
         {
             AdvancedRobot tmpBot = this.bb.Robot;
-            ScannedRobotEvent e = this.bb.ScannendEvent;
+            ScannedRobotEvent e = this.bb.CurrentEnemy.E;
 
             if(tmpBot.Time % 50==0)
             {

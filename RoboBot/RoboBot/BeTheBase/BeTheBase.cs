@@ -8,20 +8,23 @@ namespace BCDK
 {
     public class BeTheBase : AdvancedRobot
     {
-        BaseNode attackBehaviour;
+        BaseNode pushBehaviour;
         BaseNode moveBehaviour;
-        BaseNode behaviourTree;
+        BaseNode paternBehaviour;
         BaseNode dodgeBehaviour;
         BaseNode currentBehaviour;
-        BaseNode testBehaviour;
+        BaseNode antiGravBehaviour;
         BlackBoard blackBoard = new BlackBoard();
-        bool scannReady = false;
+
         int bulletsMissed = 0;
         int bulletMissedMax = 0;
         int bulletHitBulletCount = 0;
         int incomingHitss = 0;
         int scannCheckTime = 3;
+
         double turnRadians = 360;
+
+        bool scannReady = false;
         bool move = false;
         bool attackReady = false;
 
@@ -31,33 +34,46 @@ namespace BCDK
 
             blackBoard.Robot = this;
             TurnRadarRight(360);
-            dodgeBehaviour = new SequenceNode(blackBoard, new ScanNode(blackBoard, 360), new TrackNode(blackBoard, 360, 40), new AimNode(blackBoard), new CircleAroundNode(blackBoard));
-            attackBehaviour = new SequenceNode(blackBoard, 
+
+            dodgeBehaviour = new SequenceNode(blackBoard, 
+                new ScanNode(blackBoard, 360), 
+                new TrackNode(blackBoard, 360, 40), 
+                new AimNode(blackBoard), 
+                new CircleAroundNode(blackBoard));
+
+            pushBehaviour = new SequenceNode(blackBoard, 
                 new ScanNode(blackBoard, 360), 
                 new TrackNode(blackBoard, 360, 30), 
                 new TurnNode(blackBoard), 
                 new AnitGravMoveNode(blackBoard, 200),
                 new AimNode(blackBoard),
                 new ConditionNode(blackBoard, new Func<bool>(() => AttackCheck()), new QSNode(blackBoard)));
-            behaviourTree = new SequenceNode(blackBoard, new ScanNode(blackBoard, 360),
+
+            paternBehaviour = new SequenceNode(blackBoard, 
+                new ScanNode(blackBoard, 360),
                 new FindPattern(blackBoard),
                 new FireNode(blackBoard, 2),
                 new ConditionNode(blackBoard, new Func<bool>(() => blackBoard.DirectHit), new FireNode(blackBoard, 3)),
                 new MoveNode(blackBoard, 200));
-            //new ConditionNode(blackBoard, new Func<bool>(() => RangeCheck()), new RageNode(blackBoard, 3)));
 
-            moveBehaviour = new SequenceNode(blackBoard, new ScanNode(blackBoard, 360), new TrackNode(blackBoard, 360, 40), new SetPowerNode(blackBoard), new AimNode(blackBoard), new ConditionNode(blackBoard, new Func<bool>(() => AttackCheck()),new QSNode(blackBoard)), new AnitGravMoveNode(blackBoard, 100));
-            testBehaviour = new SequenceNode(blackBoard,
+            moveBehaviour = new SequenceNode(blackBoard, 
+                new ScanNode(blackBoard, 360), 
+                new TrackNode(blackBoard, 360, 40), 
+                new SetPowerNode(blackBoard), 
+                new AimNode(blackBoard), 
+                new ConditionNode(blackBoard, new Func<bool>(() => AttackCheck()),new QSNode(blackBoard)), 
+                new AnitGravMoveNode(blackBoard, 100));
+
+            antiGravBehaviour = new SequenceNode(blackBoard,
                 new ScanNode(blackBoard, 360),              
                 new AnitGravMoveNode(blackBoard,200),
                 new TurnNode(blackBoard),
                 new SetPowerNode(blackBoard),
                 new TrackNode(blackBoard, 360, 40),
                 new AimNode(blackBoard),
-                //new FireNode(blackBoard, 3),
                 new ConditionNode(blackBoard, new Func<bool>(()=> AttackCheck()), new QSNode(blackBoard)));
 
-            currentBehaviour = testBehaviour;
+            currentBehaviour = antiGravBehaviour;
 
             // divorce radar movement from gun movement
             IsAdjustRadarForGunTurn = true;
@@ -65,9 +81,7 @@ namespace BCDK
             IsAdjustGunForRobotTurn=true;
             while (true)
             {
-
-                currentBehaviour.Tick();
-               
+                currentBehaviour.Tick();               
                 Execute();
             }
         }
@@ -86,7 +100,7 @@ namespace BCDK
 
         public bool MoveCheck()
         {
-            double changeInEnergy = this.blackBoard.PreviousEnergy - this.blackBoard.ScannendEvent.Energy;
+            double changeInEnergy = this.blackBoard.PreviousEnergy - this.blackBoard.CurrentEnemy.E.Energy;
             if (changeInEnergy >= -3 && changeInEnergy <= 3)
             {
                 return false;
@@ -97,32 +111,6 @@ namespace BCDK
             }
         }
 
-        public bool CheckEnemyDistance()
-        {
-            double distance = this.blackBoard.ScannendEvent.Distance;
-            if (distance > 150)
-                return true;
-            else
-                return false;
-        }
-
-        public bool RangeCheck()
-        {
-            double power = (400 / this.blackBoard.ScannendEvent.Distance);
-            // selects a bullet power based on our distance away from the target
-            bool check = false;
-            if ((power >= 2))
-            {
-                power = 3;
-                check = true;
-            }
-            else
-            {
-                check = false;
-            }
-            return check;
-        }
-
         public override void OnScannedRobot(ScannedRobotEvent evnt)
         {
             base.OnScannedRobot(evnt);
@@ -130,27 +118,7 @@ namespace BCDK
             {
                 blackBoard.CurrentEnemy = new EnemyData(evnt, evnt.Velocity, evnt.Heading);
             }
-            blackBoard.ScannendEvent = evnt;
-            blackBoard.CurrentEnemy.Update(evnt, this);
-            
-
-            /*
-            if (scannReady)
-            {
-                if (evnt != null)
-                {
-                    int scannedX = 0;
-                    int scannedY = 0;
-                    double angle = Utils.ToRadians((Heading + evnt.Bearing) % 360);
-                    scannedX = (int)(X + Math.Sin(angle) * evnt.Distance);
-                    scannedY = (int)(Y + Math.Cos(angle) * evnt.Distance);
-                    //GoTo(scannedX, scannedY);
-                    double absoluteBearing = Heading + evnt.Bearing;
-                    TurnGunRight(Utils.ToDegrees(Utils.NormalRelativeAngle(Utils.ToRadians(absoluteBearing - GunHeading))));
-                    Fire(1);
-                    scannReady = false;
-                }
-            }*/
+            blackBoard.CurrentEnemy.Update(evnt, this);           
         }
 
         public override void OnHitWall(HitWallEvent evnt)
@@ -159,6 +127,7 @@ namespace BCDK
 
             blackBoard.MovementDirection *= -1;
         }
+
         public override void OnBulletMissed(BulletMissedEvent evnt)
         {
             base.OnBulletMissed(evnt);
@@ -173,7 +142,7 @@ namespace BCDK
 
             if(bulletMissedMax > 5)
             {
-                currentBehaviour = attackBehaviour;
+                currentBehaviour = pushBehaviour;
             }
         }
 
@@ -202,13 +171,9 @@ namespace BCDK
             incomingHitss++;
             if (incomingHitss > 0&& !blackBoard.DirectHit || Time % 100 == 0)
             {
-               // currentBehaviour = moveBehaviour;
+                // currentBehaviour = moveBehaviour;
                 blackBoard.DirectHit = true;
                 incomingHitss = 0;
-            }
-            else if(Time % 100 == 0)
-            {
-                blackBoard.DirectHit = true;
             }
         }
 
@@ -223,7 +188,7 @@ namespace BCDK
             base.OnRobotDeath(evnt);
             SetTurnRadarRightRadians(360);
             blackBoard.CurrentEnemy = null;
-            currentBehaviour = attackBehaviour;
+            currentBehaviour = pushBehaviour;
             Execute();
         }
     }
